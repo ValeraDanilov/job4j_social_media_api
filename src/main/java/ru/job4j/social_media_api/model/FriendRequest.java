@@ -18,11 +18,7 @@ public class FriendRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private int id;
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User sender;
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private User receiver;
+    private int senderId;
+    private int receiverId;
     private boolean status;
 }
