@@ -21,19 +21,19 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     @Query(
             """
                     select user from User user
-                    join FriendRequest fr on user.id = fr.senderId
-                    where fr.receiverId = :receiverId and fr.status = false
+                    join FriendRequest fr on user.id = fr.sender.id
+                    where fr.receiver = :receiver and fr.status = false
                     """
     )
-    List<User> findAllSubscribers(@Param("receiverId") int receiverId);
+    List<User> findAllSubscribers(@Param("receiver") User receiver);
 
     @Query(
             """
-                    SELECT CASE WHEN fr.senderId = :friendId
-                    THEN fr.receiverId ELSE fr.senderId END
+                    SELECT CASE WHEN fr.sender = :friend
+                    THEN fr.receiver ELSE fr.sender END
                     FROM FriendRequest fr
-                    WHERE (:friendId = fr.senderId OR :friendId = fr.receiverId) AND fr.status = true
+                    WHERE (:friendId = fr.sender OR :friendId = fr.receiver) AND fr.status = true
                     """
     )
-    List<User> findAllFriends(@Param("friendId") int friendId);
+    List<User> findAllFriends(@Param("friend") User friend);
 }

@@ -39,19 +39,12 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     )
     void deletePhotoFromPost(@Param("id") int id);
 
-    @Query(
-            """
-                    delete from Post post where post.id = :id
-                    """
-    )
-    void deletePost(@Param("id") int id);
-
 
     @Query(
             """
                     select post from Post post
-                    join FriendRequest  fr on fr.senderId = :senderId
-                    where fr.receiverId = post.user.id and fr.status = false order by post.created desc
+                    join FriendRequest  fr on fr.sender = :sender
+                    where fr.receiver.id = post.user.id and fr.status = false order by post.created desc
                     """)
-    Page<Post> findAllPostFromUserSubscriptions(@Param("senderId") int senderId, Pageable pageable);
+    Page<Post> findAllPostFromUserSubscriptions(@Param("sender") User sender, Pageable pageable);
 }
