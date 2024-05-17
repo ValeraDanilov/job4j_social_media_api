@@ -18,6 +18,10 @@ public class FriendList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private int id;
-    private int userId;
-    private int friendId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    @ManyToOne
+    @JoinColumn(name = "friend_id")
+    private User friend;
 }

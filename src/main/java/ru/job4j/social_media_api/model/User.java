@@ -23,15 +23,4 @@ public class User {
     private String username;
     private String email;
     private String password;
-    @OneToMany(mappedBy = "senderId")
-    private Set<FriendRequest> sentFriendRequests = new HashSet<>();
-    @OneToMany(mappedBy = "receiverId")
-    private Set<FriendRequest> receivedFriendRequests = new HashSet<>();
-    @ManyToMany
-    @JoinTable(
-            name = "friends_list",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private Set<FriendList> friends = new HashSet<>();
 }
