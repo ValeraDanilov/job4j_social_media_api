@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface PostRepository extends CrudRepository<Post, Integer> {
 
-    List<Post> findAllByUserId(int userId);
+    List<Post> findAllPostsByUserId(int userId);
 
     List<Post> findAllByCreatedBetween(LocalDateTime startDate, LocalDateTime finishDate);
 
@@ -30,15 +30,6 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
                     """
     )
     void updatePostTitleAndDescription(@Param("title") String title, @Param("description") String description, @Param("id") int id);
-
-    @Modifying(clearAutomatically = true)
-    @Query(
-            """
-                    update Post post set post.photo = null where post.id = :id
-                    """
-    )
-    void deletePhotoFromPost(@Param("id") int id);
-
 
     @Query(
             """

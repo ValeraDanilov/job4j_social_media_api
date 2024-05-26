@@ -6,23 +6,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "posts")
-public class Post {
+@Table(name = "images")
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private int id;
-    private String title;
-    private String description;
+    private String name;
+    private byte[] imageData;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    private LocalDateTime created = LocalDateTime.now();
+    @JoinColumn(name = "post_id")
+    private Post post;
 }
