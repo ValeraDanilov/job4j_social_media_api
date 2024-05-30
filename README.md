@@ -1,4 +1,4 @@
-[![Java CI](https://github.com/ValeraDanilov/job4j_social_media_api/workflows/Java%20CI/badge.svg)](https://github.com/ValeraDanilov/job4j_social_media_api/actions/new)
+![Build Status](https://github.com/ValeraDanilov/job4j_social_media_api/actions/workflows/maven.yml/badge.svg?event=push)
 
 Техническое задание: Social Media API
 

@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import ru.job4j.social_media_api.model.Post;
 import ru.job4j.social_media_api.model.User;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,8 +33,13 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     @Query(
             """
                     select post from Post post
-                    join FriendRequest  fr on fr.sender = :sender
-                    where fr.receiver.id = post.user.id and fr.status = false order by post.created desc
-                    """)
-    Page<Post> findAllPostFromUserSubscriptions(@Param("sender") User sender, Pageable pageable);
+                    join FriendRequest fr on post.user = fr.sender or post.user = fr.receiver
+                    where (fr.sender = :userId or fr.receiver = :userId)
+                    and (fr.status = true OR (fr.status = false and fr.sender = :userId))
+                    and post.user != :userId
+                    """
+    )
+    Page<Post> findAllPostFromUserSubscriptions(@Param("userId") User userId, Pageable pageable);
+
+    void deletePostById(int postId);
 }

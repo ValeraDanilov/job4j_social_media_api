@@ -7,6 +7,8 @@ import ru.job4j.social_media_api.model.FriendRequest;
 import ru.job4j.social_media_api.model.User;
 import ru.job4j.social_media_api.repository.FriendRequestRepository;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class FriendRequestService {
@@ -14,41 +16,88 @@ public class FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
 
     /**
-     * find the recipient.
+     * Finds a friend request by request ID.
      *
-     * @param receiver User.
-     * @return FriendRequest.
+     * @param requestId The ID of the friend request to search for.
+     * @return An Optional containing the FriendRequest object if found, or an empty Optional if not found.
      */
-    public FriendRequest findByReceiver(User receiver) {
-        return this.friendRequestRepository.findByReceiver(receiver);
+    public Optional<FriendRequest> findById(int requestId) {
+        return this.friendRequestRepository.findById(requestId);
     }
 
     /**
-     * update friend status.
-     * if status = true (friend).
-     * if status = false (follower).
+     * Deletes a friend request and keeps the user as a follower.
      *
-     * @param userReceiver FriendRequest.
+     * @param requestId the ID of the friend request to delete
+     * @param userId    the ID of the user making the request
+     * @return true if the friend request was successfully deleted, false otherwise
      */
     @Transactional
-    public void deleteFriendAndKeepFollower(FriendRequest userReceiver) {
-        userReceiver.setStatus(false);
-        this.friendRequestRepository.save(userReceiver);
+    public boolean deleteFriendAndKeepFollower(int requestId, int userId) {
+        Optional<FriendRequest> findFriendRequest = findById(requestId);
+        if (findFriendRequest.isPresent() && findFriendRequest.get().isStatus()
+                && (findFriendRequest.get().getSender().getId() == userId
+                || findFriendRequest.get().getReceiver().getId() == userId)) {
+            FriendRequest newFriendRequest = findFriendRequest.get();
+            if (findFriendRequest.get().getSender().getId() == userId) {
+                User sender = newFriendRequest.getSender();
+                newFriendRequest.setSender(findFriendRequest.get().getReceiver());
+                newFriendRequest.setReceiver(sender);
+            }
+            newFriendRequest.setStatus(false);
+            this.friendRequestRepository.save(newFriendRequest);
+            return true;
+        }
+        return false;
     }
 
     /**
-     * The method adds a friend request between two users.
+     * Deletes a friend request if it meets the specified conditions.
      *
-     * @param sender user who sends the request.
-     * @param receiver user to whom the request is sent.
-     * @param result the result of whether you accepted the friend request or rejected it.
+     * @param requestId the ID of the friend request to delete
+     * @param userId    the ID of the user making the request
+     * @return true if the friend request was successfully deleted, false otherwise
      */
     @Transactional
-    public void sendOrReceiverFriendRequest(User sender, User receiver, boolean result) {
-        FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setSender(sender);
-        friendRequest.setReceiver(receiver);
-        friendRequest.setStatus(result);
-        this.friendRequestRepository.save(friendRequest);
+    public boolean deleteRequest(int requestId, int userId) {
+        Optional<FriendRequest> findFriendRequest = findById(requestId);
+        if (findFriendRequest.isPresent()
+                && findFriendRequest.get().getSender().getId() == userId
+                && !findFriendRequest.get().isStatus()) {
+            this.friendRequestRepository.delete(findFriendRequest.get());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sends a friend request by saving it in the database with a status of false.
+     *
+     * @param sendRequest the friend request to send
+     */
+    @Transactional
+    public void sendRequest(FriendRequest sendRequest) {
+        sendRequest.setStatus(false);
+        this.friendRequestRepository.save(sendRequest);
+    }
+
+    /**
+     * Accepts a friend request by changing its status to true in the database.
+     *
+     * @param requestId the ID of the friend request to accept
+     * @param userId    the ID of the user accepting the friend request
+     * @return true if the friend request was successfully accepted, false otherwise
+     */
+    @Transactional
+    public boolean acceptRequest(int requestId, int userId) {
+        Optional<FriendRequest> findFriendRequest = findById(requestId);
+        if (findFriendRequest.isPresent()
+                && findFriendRequest.get().getReceiver().getId() == userId) {
+            findFriendRequest.get().setStatus(true);
+            this.friendRequestRepository.save(findFriendRequest.get());
+        } else {
+            return false;
+        }
+        return true;
     }
 }

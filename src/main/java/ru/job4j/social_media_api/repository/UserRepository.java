@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<User, Integer> {
+
+    List<User> findAll();
+
     @Query(
             """
                     select user from User user
@@ -29,10 +32,11 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     @Query(
             """
-                    SELECT CASE WHEN fr.sender = :friend
-                    THEN fr.receiver ELSE fr.sender END
-                    FROM FriendRequest fr
-                    WHERE (:friendId = fr.sender OR :friendId = fr.receiver) AND fr.status = true
+                    select user from User user
+                    join FriendRequest fr on user = fr.sender or user = fr.receiver
+                    where (fr.receiver = :friend or fr.sender = :friend)
+                    and fr.status = true
+                    and user != :friend
                     """
     )
     List<User> findAllFriends(@Param("friend") User friend);

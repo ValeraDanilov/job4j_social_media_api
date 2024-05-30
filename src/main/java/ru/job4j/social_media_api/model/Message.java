@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,4 +26,5 @@ public class Message {
     @JoinColumn(name = "receiver_id")
     private User friend;
     private String context;
+    private LocalDateTime created = LocalDateTime.now();
 }

@@ -1,10 +1,7 @@
 package ru.job4j.social_media_api.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "posts")
+@ToString
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

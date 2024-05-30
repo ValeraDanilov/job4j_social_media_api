@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import ru.job4j.social_media_api.model.Image;
-import java.util.Optional;
+
+import java.util.List;
 
 public interface ImageRepository extends CrudRepository<Image, Integer> {
 
@@ -30,7 +31,7 @@ public interface ImageRepository extends CrudRepository<Image, Integer> {
     @Modifying(clearAutomatically = true)
     @Query(
             """
-                    update Image image set image.name = :name, image.imageData = :imageData where image.id = :id
+                    update Image image set image.name = :name, image.img = :imageData where image.id = :id
                     """
     )
     void updateImage(@Param("name") String name, @Param("imageData") byte[] imageData, @Param("id") int id);
@@ -40,5 +41,5 @@ public interface ImageRepository extends CrudRepository<Image, Integer> {
                     select image from Image image where image.post.id = :postId
                     """
     )
-    Optional<Image> findImageByPostId(@Param("postId") int postId);
+    List<Image> findImageByPostId(@Param("postId") int postId);
 }

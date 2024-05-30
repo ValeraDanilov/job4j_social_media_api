@@ -12,6 +12,5 @@
     <include file="scripts/002_ddl_create_posts_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/003_ddl_create_images_table.sql" relativeToChangelogFile="true"/>
     <include file="scripts/004_ddl_create_friend_requests_table.sql" relativeToChangelogFile="true"/>
-    <include file="scripts/005_ddl_create_friends_list_table.sql" relativeToChangelogFile="true"/>
-    <include file="scripts/006_ddl_create_messages_table.sql" relativeToChangelogFile="true"/>
+    <include file="scripts/005_ddl_create_messages_table.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
