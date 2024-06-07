@@ -16,7 +16,6 @@ import ru.job4j.social_media_api.model.User;
 import ru.job4j.social_media_api.repository.ImageRepository;
 import ru.job4j.social_media_api.repository.PostRepository;
 import ru.job4j.social_media_api.repository.UserRepository;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,11 +36,11 @@ public class PostService {
      * @param postId The ID of the post to retrieve.
      * @return A PostAndImagesDTO object containing the post and its associated images, if found.
      */
-    public PostAndImagesDTO findById(int postId) {
+    public Optional<PostAndImagesDTO> findById(int postId) {
         Optional<Post> findPost = this.postRepository.findById(postId);
-        PostAndImagesDTO postAndImagesDTO = new PostAndImagesDTO();
+        Optional<PostAndImagesDTO> postAndImagesDTO = Optional.of(new PostAndImagesDTO());
         if (findPost.isPresent()) {
-            postAndImagesDTO = createPostAndImageDTO(List.of(findPost.get())).get(0);
+            postAndImagesDTO = Optional.ofNullable(createPostAndImageDTO(List.of(findPost.get())).get(0));
         }
         return postAndImagesDTO;
     }
@@ -183,12 +182,14 @@ public class PostService {
      * @param images The list of images to be deleted from the post
      */
     @Transactional
-    public void deleteImageFromPost(int postId, List<Image> images) {
+    public boolean deleteImageFromPost(int postId, List<Image> images) {
         Optional<Post> existingPost = this.postRepository.findById(postId);
         if (existingPost.isPresent() && !(images.isEmpty())
                 && !(this.imageRepository.findImageByPostId(postId).isEmpty())) {
             images.forEach(img -> this.imageRepository.deleteImageFromPost(postId, img.getId()));
+            return true;
         }
+        return false;
     }
 
     /**

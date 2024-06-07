@@ -1,11 +1,12 @@
 package ru.job4j.social_media_api.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.job4j.social_media_api.model.FriendRequest;
 import ru.job4j.social_media_api.service.FriendRequestService;
-
-import java.util.Optional;
 
 @AllArgsConstructor
 @RestController
@@ -15,27 +16,46 @@ public class FriendRequestController {
     private final FriendRequestService service;
 
     @GetMapping("/{id}")
-    public Optional<FriendRequest> findById(@PathVariable("id") int id) {
-        return service.findById(id);
+    public ResponseEntity<FriendRequest> findById(@PathVariable("id") int id) {
+        return service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{requestId}/{userId}")
-    public boolean deleteFriendAndKeepFollower(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
-        return this.service.deleteFriendAndKeepFollower(requestId, userId);
+    public ResponseEntity<Void> deleteFriendAndKeepFollower(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
+        if (this.service.deleteFriendAndKeepFollower(requestId, userId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{requestId}/{userId}")
-    public boolean deleteRequest(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
-        return this.service.deleteRequest(requestId, userId);
+    public ResponseEntity<Void> deleteRequest(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
+        if (this.service.deleteRequest(requestId, userId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public void sendRequest(@RequestBody FriendRequest sendRequest) {
+    public ResponseEntity<FriendRequest> sendRequest(@RequestBody FriendRequest sendRequest) {
         this.service.sendRequest(sendRequest);
+        var uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(sendRequest.getId())
+                .toUri();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(uri)
+                .body(sendRequest);
     }
 
     @GetMapping("/accept/{requestId}/{userId}")
-    public boolean acceptRequest(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
-        return this.service.acceptRequest(requestId, userId);
+    public ResponseEntity<Void> acceptRequest(@PathVariable("requestId") int requestId, @PathVariable("userId") int userId) {
+        if (this.service.acceptRequest(requestId, userId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

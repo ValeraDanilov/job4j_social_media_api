@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.job4j.social_media_api.model.Message;
 import ru.job4j.social_media_api.repository.MessageRepository;
+
 import java.util.Optional;
 
 @Service
@@ -37,8 +38,12 @@ public class MessageService {
         return updateMessage == null;
     }
 
-    public void delete(int messageId) {
+    public boolean delete(int messageId) {
         Optional<Message> findMessage = this.messageRepository.findById(messageId);
-        findMessage.ifPresent(this.messageRepository::delete);
+        if (findMessage.isPresent()) {
+            this.messageRepository.delete(findMessage.get());
+            return true;
+        }
+        return false;
     }
 }

@@ -95,9 +95,8 @@ public class FriendRequestService {
                 && findFriendRequest.get().getReceiver().getId() == userId) {
             findFriendRequest.get().setStatus(true);
             this.friendRequestRepository.save(findFriendRequest.get());
-        } else {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }
