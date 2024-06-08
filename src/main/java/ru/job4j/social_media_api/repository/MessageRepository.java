@@ -8,4 +8,6 @@ import ru.job4j.social_media_api.model.Message;
 public interface MessageRepository extends CrudRepository<Message, Integer> {
 
     Page<Message> findAllByUserIdOrderByCreatedDesc(int userId, Pageable pageable);
+
+    boolean deleteById(int messageId);
 }

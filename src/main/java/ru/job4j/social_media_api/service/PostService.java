@@ -16,6 +16,7 @@ import ru.job4j.social_media_api.model.User;
 import ru.job4j.social_media_api.repository.ImageRepository;
 import ru.job4j.social_media_api.repository.PostRepository;
 import ru.job4j.social_media_api.repository.UserRepository;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -31,18 +32,15 @@ public class PostService {
     private final UserMapper userMapper;
 
     /**
-     * Retrieves the post and associated images by the given post ID.
+     * Retrieves a post and its associated images by the given post ID.
      *
-     * @param postId The ID of the post to retrieve.
-     * @return A PostAndImagesDTO object containing the post and its associated images, if found.
+     * @param postId the ID of the post to be retrieved
+     * @return an Optional containing a PostAndImagesDTO object with post details and associated images,
+     * or an empty Optional if the post with the specified ID is not found
      */
     public Optional<PostAndImagesDTO> findById(int postId) {
         Optional<Post> findPost = this.postRepository.findById(postId);
-        Optional<PostAndImagesDTO> postAndImagesDTO = Optional.of(new PostAndImagesDTO());
-        if (findPost.isPresent()) {
-            postAndImagesDTO = Optional.ofNullable(createPostAndImageDTO(List.of(findPost.get())).get(0));
-        }
-        return postAndImagesDTO;
+        return Optional.ofNullable(createPostAndImageDTO(List.of(findPost.get())).get(0));
     }
 
     /**
@@ -59,17 +57,13 @@ public class PostService {
     }
 
     /**
-     * Retrieves a list of posts with associated images created by a specific user.
+     * Retrieves a list of posts and their associated images for a given user ID.
      *
-     * @param userId The ID of the user for whom to retrieve the posts.
-     * @return A list of PostAndImagesDTO objects representing the posts with images created by the user.
+     * @param userId the ID of the user whose posts are to be retrieved
+     * @return a list of PostAndImagesDTO objects containing post details and associated images
      */
     public List<PostAndImagesDTO> findAllPostsByUserId(int userId) {
-        Optional<User> findUser = this.userRepository.findById(userId);
-        List<Post> posts = new ArrayList<>();
-        if (findUser.isPresent()) {
-            posts = this.postRepository.findAllPostsByUserId(findUser.get().getId());
-        }
+        List<Post> posts = this.postRepository.findAllPostsByUserId(userId);
         return createPostAndImageDTO(posts);
     }
 
@@ -153,38 +147,37 @@ public class PostService {
     }
 
     /**
-     * This method deletes a post and its associated images from the database based on the provided post ID.
-     * It first checks if the post exists in the database, deletes any associated images if present, and then deletes the post itself.
-     * Returns true if the post and images were successfully deleted, otherwise returns false.
+     * Deletes the post with the specified ID from the database and also deletes any associated images.
+     * <p>
+     * This method first checks if there are any images associated with the post to be deleted. If images are found,
+     * they are deleted using the ImageRepository. Then, the post with the given ID is deleted from the database
+     * using the PostRepository. This operation is wrapped in a transaction to ensure data consistency.
      *
-     * @param postId The ID of the post to be deleted
-     * @return true if the post and images were successfully deleted, false otherwise
+     * @param postId the ID of the post to delete
+     * @return true if the post and associated images were successfully deleted, false otherwise
      */
     @Transactional
     public boolean delete(int postId) {
-        Optional<Post> existingPost = this.postRepository.findById(postId);
-        if (existingPost.isPresent()) {
-            if (!this.imageRepository.findImageByPostId(postId).isEmpty()) {
-                this.imageRepository.deleteImagesByPostId(postId);
-            }
-            this.postRepository.deletePostById(postId);
-            return true;
+        if (!this.imageRepository.findImageByPostId(postId).isEmpty()) {
+            this.imageRepository.deleteImagesByPostId(postId);
         }
-        return false;
+        return this.postRepository.deleteById(postId);
     }
 
     /**
-     * This method deletes the specified image(s) from a post based on the provided post ID and list of images.
-     * It first checks if the post exists in the database, if the list of images is not empty, and if the images are associated with the post.
-     * Then it iterates through the list of images and deletes each image from the post.
+     * Deletes the specified images from a post.
+     * <p>
+     * This method deletes the specified images from the post with the given ID. It checks if the list of images
+     * to delete is not empty and if there are images associated with the specified post. If the conditions are met,
+     * the method deletes each image from the post using the ImageRepository.
      *
-     * @param postId The ID of the post from which the images should be deleted
-     * @param images The list of images to be deleted from the post
+     * @param postId the ID of the post from which to delete the images
+     * @param images a list of Image objects to delete from the post
+     * @return true if the images were successfully deleted, false otherwise
      */
     @Transactional
     public boolean deleteImageFromPost(int postId, List<Image> images) {
-        Optional<Post> existingPost = this.postRepository.findById(postId);
-        if (existingPost.isPresent() && !(images.isEmpty())
+        if (!(images.isEmpty())
                 && !(this.imageRepository.findImageByPostId(postId).isEmpty())) {
             images.forEach(img -> this.imageRepository.deleteImageFromPost(postId, img.getId()));
             return true;

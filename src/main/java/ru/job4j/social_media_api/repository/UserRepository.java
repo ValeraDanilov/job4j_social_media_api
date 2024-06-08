@@ -25,19 +25,21 @@ public interface UserRepository extends CrudRepository<User, Integer> {
             """
                     select user from User user
                     join FriendRequest fr on user.id = fr.sender.id
-                    where fr.receiver = :receiver and fr.status = false
+                    where fr.receiver.id = :userId and fr.status = false
                     """
     )
-    List<User> findAllSubscribers(@Param("receiver") User receiver);
+    List<User> findAllSubscribers(@Param("userId") int userId);
 
     @Query(
             """
                     select user from User user
                     join FriendRequest fr on user = fr.sender or user = fr.receiver
-                    where (fr.receiver = :friend or fr.sender = :friend)
+                    where (fr.receiver.id = :userId or fr.sender.id = :userId)
                     and fr.status = true
-                    and user != :friend
+                    and user.id != :userId
                     """
     )
-    List<User> findAllFriends(@Param("friend") User friend);
+    List<User> findAllFriends(@Param("userId") int userId);
+
+    boolean deleteById(int userId);
 }

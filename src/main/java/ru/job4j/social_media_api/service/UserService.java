@@ -2,6 +2,7 @@ package ru.job4j.social_media_api.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.social_media_api.model.FriendRequest;
 import ru.job4j.social_media_api.model.Post;
 import ru.job4j.social_media_api.model.User;
@@ -9,7 +10,6 @@ import ru.job4j.social_media_api.repository.FriendRequestRepository;
 import ru.job4j.social_media_api.repository.PostRepository;
 import ru.job4j.social_media_api.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,14 +51,16 @@ public class UserService {
     }
 
     /**
-     * Finds all friends of a user with the given userId.
+     * Retrieves a list of all friends of a specified user.
+     * <p>
+     * This method retrieves a list of all friends of the user with the specified ID. The list includes
+     * all users who are connected to the specified user as friends.
      *
-     * @param userId The id of the user whose friends are to be found.
-     * @return A list of User objects representing the friends of the user.
+     * @param userId the ID of the user for whom to retrieve the list of friends
+     * @return a list of User objects representing the friends of the specified user
      */
     public List<User> findAllFriends(int userId) {
-        Optional<User> findUser = getUserById(userId);
-        return findUser.map(this.userRepository::findAllFriends).orElse(new ArrayList<>());
+        return this.userRepository.findAllFriends(userId);
     }
 
     /**
@@ -67,6 +69,7 @@ public class UserService {
      * @param user The user object to be created.
      * @return The user object that was created and saved in the database.
      */
+    @Transactional
     public User create(User user) {
         return this.userRepository.save(user);
     }
@@ -77,6 +80,7 @@ public class UserService {
      * @param user The user object containing the updated information.
      * @return true if the user is found and successfully updated in the database, false otherwise.
      */
+    @Transactional
     public boolean updateUser(User user) {
         Optional<User> findUser = getUserById(user.getId());
         if (findUser.isPresent()) {
@@ -86,34 +90,29 @@ public class UserService {
     }
 
     /**
-     * Deletes a user by their ID.
+     * Deletes a user and all associated data from the system.
+     * <p>
+     * This method deletes the specified user along with all their posts and friend requests.
      *
-     * @param userId The ID of the user to be deleted.
-     * @return true if the user was successfully deleted, false otherwise.
+     * @param userId the ID of the user to be deleted
+     * @return true if the user was successfully deleted, false otherwise
      */
+    @Transactional
     public boolean deleteUser(int userId) {
-        Optional<User> findUser = getUserById(userId);
-        if (findUser.isPresent()) {
-            List<Post> findPosts = this.postRepository.findAllPostsByUserId(findUser.get().getId());
-            findPosts.forEach(post -> this.postRepository.deletePostById(post.getId()));
-            List<FriendRequest> findFriendRequest = this.friendRequestRepository.findReceiverById(userId);
-            this.friendRequestRepository.deleteAll(findFriendRequest);
-            this.userRepository.delete(findUser.get());
-        }
-        return findUser.isPresent();
+        List<Post> findPosts = this.postRepository.findAllPostsByUserId(userId);
+        findPosts.forEach(post -> this.postRepository.deleteById(post.getId()));
+        List<FriendRequest> findFriendRequest = this.friendRequestRepository.findReceiverById(userId);
+        this.friendRequestRepository.deleteAll(findFriendRequest);
+        return this.userRepository.deleteById(userId);
     }
 
     /**
-     * Finds all subscribers of a user by their ID.
+     * Retrieves a list of all subscribers for the specified user.
      *
-     * @param userId The ID of the user whose subscribers are to be found.
-     * @return A list of users who are subscribers of the specified user.
-     * Returns an empty list if the specified user is not found.
+     * @param userId the ID of the user for whom to retrieve subscribers
+     * @return a list of User objects representing the subscribers
      */
     public List<User> findAllSubscribers(int userId) {
-        Optional<User> findUser = getUserById(userId);
-        return findUser.map(this.userRepository::findAllSubscribers).orElse(new ArrayList<>());
+        return this.userRepository.findAllSubscribers(userId);
     }
-
-
 }
