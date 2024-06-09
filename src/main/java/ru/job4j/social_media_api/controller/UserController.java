@@ -1,5 +1,12 @@
 package ru.job4j.social_media_api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -18,17 +25,34 @@ import java.util.List;
 @Validated
 @AllArgsConstructor
 @RestController
+@Tag(name = "UserController", description = "UserController management APIs")
 @RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
 
+    @Operation(
+            summary = "Retrieve all Users",
+            description = "Get a list of all User objects in the system.",
+            tags = {"User", "find"}
+    )
+    @ApiResponse(responseCode = "200", description = "List of all users retrieved successfully", content = @Content)
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAll() {
         return this.userService.findAll();
     }
 
+    @Operation
+            (
+                    summary = "Retrieve a User by userId",
+                    description = "Get a User object by specifying its userId. The response is User object with userId, username, email and password.",
+                    tags = {"User", "get"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = User.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", content = {@Content(schema = @Schema())})
+    })
     @GetMapping("/{userId}")
     public ResponseEntity<User> get(@PathVariable("userId")
                                     @ValidUserId
@@ -38,6 +62,17 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation
+            (
+                    summary = "Retrieve all subscribers for a User by userId",
+                    description = "Get a list of User objects who are subscribers of the specified userId."
+                            + " The response is a list of User objects with userId, username, email, and password.",
+                    tags = {"User", "get"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content =
+                    {@Content(array = @ArraySchema(schema = @Schema(implementation = User.class)), mediaType = "application/json")})
+    })
     @GetMapping("/follower/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAllSubscribers(@PathVariable("userId")
@@ -46,6 +81,17 @@ public class UserController {
         return this.userService.findAllSubscribers(Integer.parseInt(userId));
     }
 
+    @Operation
+            (
+                    summary = "Retrieve all friends for a User by userId",
+                    description = "Get a list of User objects who are friends of the specified userId."
+                            + " The response is a list of User objects with userId, username, email, and password.",
+                    tags = {"User", "get"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content =
+                    {@Content(array = @ArraySchema(schema = @Schema(implementation = User.class)), mediaType = "application/json")})
+    })
     @GetMapping("/friend/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAllFriends(@PathVariable("userId")
@@ -54,6 +100,17 @@ public class UserController {
         return this.userService.findAllFriends(Integer.parseInt(userId));
     }
 
+    @Operation
+            (
+                    summary = "Find a User by username and password",
+                    description = "Find a User object by the specified username and password. If the user is found,"
+                            + " return the User object with userId, username, email and password; otherwise return User not found.",
+                    tags = {"User", "get"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = User.class), mediaType = "application/json")}),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @GetMapping("/find")
     public ResponseEntity<User> findByUsernameAndPassword(@RequestParam
                                                           @NonNull
@@ -71,6 +128,16 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Operation
+            (
+                    summary = "Create a new User",
+                    description = "Create a new User with the provided details. Returns the created User object with a 201 Created response code.",
+                    tags = {"User", "post"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully", content =
+                    {@Content(schema = @Schema(implementation = User.class), mediaType = "application/json")})
+    })
     @PostMapping
     public ResponseEntity<User> create(@Valid @RequestBody User user) {
         this.userService.create(user);
@@ -84,6 +151,17 @@ public class UserController {
                 .body(user);
     }
 
+    @Operation
+            (
+                    summary = "Update an existing User",
+                    description = "Update an existing User with the provided details."
+                            + " Returns a 200 OK response code if the User was updated successfully, or a 404 Not Found response code if the User does not exist.",
+                    tags = {"User", "update"}
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @PutMapping
     public ResponseEntity<Void> update(@Valid @RequestBody User user) {
         if (this.userService.updateUser(user)) {
@@ -92,12 +170,25 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @Operation
+            (
+                    summary = "Change details of an existing User",
+                    description = "Change details of an existing User with the provided data. Returns a 200 OK response code if the User details were changed successfully."
+            )
     @PatchMapping
     @ResponseStatus(HttpStatus.OK)
     public boolean change(@Valid @RequestBody User user) {
         return this.userService.updateUser(user);
     }
 
+    @Operation
+            (
+                    summary = "Remove user by ID", description = "Deletes a user based on the provided user ID"
+            )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> removeById(@PathVariable("userId")
                                            @ValidUserId
