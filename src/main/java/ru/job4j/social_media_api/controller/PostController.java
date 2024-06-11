@@ -50,8 +50,8 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostAndImagesDTO> findById(@PathVariable("postId")
                                                      @ValidPostId
-                                                     String postId) {
-        return this.postService.findById(Integer.parseInt(postId))
+                                                     int postId) {
+        return this.postService.findById(postId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -87,8 +87,8 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public List<PostAndImagesDTO> findAllPostsByUserId(@PathVariable("userId")
                                                        @ValidUserId
-                                                       String userId) {
-        return this.postService.findAllPostsByUserId(Integer.parseInt(userId));
+                                                       int userId) {
+        return this.postService.findAllPostsByUserId(userId);
     }
 
     @Operation(
@@ -125,8 +125,8 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public PagedResponseDTO<PostAndImagesDTO> findAllPostFromUserSubscriptions(@PathVariable("userId")
                                                                                @ValidUserId
-                                                                               String userId, Pageable pageable) {
-        return this.postService.findAllPostFromUserSubscriptions(Integer.parseInt(userId), pageable);
+                                                                               int userId, Pageable pageable) {
+        return this.postService.findAllPostFromUserSubscriptions(userId, pageable);
     }
 
     @Operation(
@@ -181,8 +181,8 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> delete(@PathVariable("postId")
                                        @ValidPostId
-                                       String postId) {
-        if (this.postService.delete(Integer.parseInt(postId))) {
+                                       int postId) {
+        if (this.postService.delete(postId)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

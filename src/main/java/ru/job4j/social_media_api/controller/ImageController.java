@@ -42,8 +42,8 @@ public class ImageController {
     public ResponseEntity<List<Image>> create(@RequestBody List<Image> images,
                                               @PathVariable("postId")
                                               @ValidPostId
-                                              String postId) {
-        this.imageService.create(images, Integer.parseInt(postId));
+                                              int postId) {
+        this.imageService.create(images, postId);
         var uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path(("/{id}"))

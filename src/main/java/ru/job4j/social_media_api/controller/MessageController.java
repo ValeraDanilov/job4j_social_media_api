@@ -43,8 +43,8 @@ public class MessageController {
     @GetMapping("/{messageId}")
     public ResponseEntity<Message> findById(@PathVariable("messageId")
                                             @ValidMessageId
-                                            String messageId) {
-        return this.messageService.findById(Integer.parseInt(messageId))
+                                            int messageId) {
+        return this.messageService.findById(messageId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -64,8 +64,8 @@ public class MessageController {
     @ResponseStatus(HttpStatus.OK)
     public Page<Message> findAll(@PathVariable("userId")
                                  @ValidUserId
-                                 String userId, Pageable pageable) {
-        return this.messageService.findAll(Integer.parseInt(userId), pageable);
+                                 int userId, Pageable pageable) {
+        return this.messageService.findAll(userId, pageable);
     }
 
     @Operation(
@@ -122,8 +122,8 @@ public class MessageController {
     @DeleteMapping("/{messageId}")
     public ResponseEntity<Void> delete(@PathVariable("messageId")
                                        @ValidMessageId
-                                       String messageId) {
-        if (this.messageService.delete(Integer.parseInt(messageId))) {
+                                       int messageId) {
+        if (this.messageService.delete(messageId)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

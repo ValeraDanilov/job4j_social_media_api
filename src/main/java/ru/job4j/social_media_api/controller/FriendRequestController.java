@@ -40,8 +40,8 @@ public class FriendRequestController {
     @GetMapping("/{id}")
     public ResponseEntity<FriendRequest> findById(@PathVariable("id")
                                                   @ValidFriendRequestId
-                                                  String id) {
-        return service.findById(Integer.parseInt(id))
+                                                  int id) {
+        return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -58,11 +58,11 @@ public class FriendRequestController {
     @PutMapping("/{requestId}/{userId}")
     public ResponseEntity<Void> deleteFriendAndKeepFollower(@PathVariable("requestId")
                                                             @ValidFriendRequestId
-                                                            String requestId,
+                                                            int requestId,
                                                             @PathVariable("userId")
                                                             @ValidUserId
-                                                            String userId) {
-        if (this.service.deleteFriendAndKeepFollower(Integer.parseInt(requestId), Integer.parseInt(userId))) {
+                                                            int userId) {
+        if (this.service.deleteFriendAndKeepFollower(requestId, userId)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
@@ -80,11 +80,11 @@ public class FriendRequestController {
     @DeleteMapping("/{requestId}/{userId}")
     public ResponseEntity<Void> deleteRequest(@PathVariable("requestId")
                                               @ValidFriendRequestId
-                                              String requestId,
+                                              int requestId,
                                               @PathVariable("userId")
                                               @ValidUserId
-                                              String userId) {
-        if (this.service.deleteRequest(Integer.parseInt(requestId), Integer.parseInt(userId))) {
+                                              int userId) {
+        if (this.service.deleteRequest(requestId, userId)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -124,11 +124,11 @@ public class FriendRequestController {
     @GetMapping("/accept/{requestId}/{userId}")
     public ResponseEntity<Void> acceptRequest(@PathVariable("requestId")
                                               @ValidFriendRequestId
-                                              String requestId,
+                                              int requestId,
                                               @PathVariable("userId")
                                               @ValidUserId
-                                              String userId) {
-        if (this.service.acceptRequest(Integer.parseInt(requestId), Integer.parseInt(userId))) {
+                                              int userId) {
+        if (this.service.acceptRequest(requestId, userId)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

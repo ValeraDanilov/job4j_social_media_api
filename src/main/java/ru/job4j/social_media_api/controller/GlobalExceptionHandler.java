@@ -26,8 +26,7 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = {DataIntegrityViolationException.class})
-    public void catchDataIntegrityViolationException(Exception e, HttpServletRequest request, HttpServletResponse response)
+    private void catchException(Exception e, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         Map<String, String> details = new HashMap<>();
         details.put("message", e.getMessage());
@@ -38,6 +37,18 @@ public class GlobalExceptionHandler {
         response.setContentType("application/json; charset=utf-8");
         response.getWriter().write(new ObjectMapper().writeValueAsString(details));
         log.error(e.getLocalizedMessage());
+    }
+
+    @ExceptionHandler(value = {DataIntegrityViolationException.class})
+    public void catchDataIntegrityViolationException(Exception e, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+      catchException(e, request, response);
+    }
+
+    @ExceptionHandler(value = {NumberFormatException.class})
+    public void catchNumberFormatException(Exception e, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        catchException(e, request, response);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

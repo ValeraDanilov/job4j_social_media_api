@@ -56,8 +56,8 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<User> get(@PathVariable("userId")
                                     @ValidUserId
-                                    String userId) {
-        return userService.getUserById(Integer.parseInt(userId))
+                                    int userId) {
+        return userService.getUserById(userId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -77,8 +77,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAllSubscribers(@PathVariable("userId")
                                          @ValidUserId
-                                         String userId) {
-        return this.userService.findAllSubscribers(Integer.parseInt(userId));
+                                         int userId) {
+        return this.userService.findAllSubscribers(userId);
     }
 
     @Operation
@@ -96,8 +96,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<User> findAllFriends(@PathVariable("userId")
                                      @ValidUserId
-                                     String userId) {
-        return this.userService.findAllFriends(Integer.parseInt(userId));
+                                     int userId) {
+        return this.userService.findAllFriends(userId);
     }
 
     @Operation
@@ -192,8 +192,8 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> removeById(@PathVariable("userId")
                                            @ValidUserId
-                                           String userId) {
-        if (this.userService.deleteUser(Integer.parseInt(userId))) {
+                                           int userId) {
+        if (this.userService.deleteUser(userId)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

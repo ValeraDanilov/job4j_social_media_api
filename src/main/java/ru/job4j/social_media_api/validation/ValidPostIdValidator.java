@@ -6,19 +6,18 @@ import lombok.AllArgsConstructor;
 import ru.job4j.social_media_api.repository.PostRepository;
 
 @AllArgsConstructor
-public class ValidPostIdValidator implements ConstraintValidator<ValidPostId, String> {
+public class ValidPostIdValidator implements ConstraintValidator<ValidPostId, Integer> {
 
     private final PostRepository postRepository;
 
     @Override
-    public boolean isValid(String postId, ConstraintValidatorContext context) {
-        if (postId == null || !postId.matches("\\d+")) {
+    public boolean isValid(Integer postId, ConstraintValidatorContext context) {
+        if (postId == null) {
             return false;
         }
-        int postIdInt = Integer.parseInt(postId);
-        if (postIdInt < 1) {
+        if (postId < 1) {
             return false;
         }
-        return this.postRepository.findById(postIdInt).isPresent();
+        return this.postRepository.findById(postId).isPresent();
     }
 }
