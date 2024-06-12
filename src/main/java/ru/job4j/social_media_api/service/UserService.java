@@ -1,6 +1,8 @@
 package ru.job4j.social_media_api.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.social_media_api.model.FriendRequest;
@@ -9,9 +11,17 @@ import ru.job4j.social_media_api.model.User;
 import ru.job4j.social_media_api.repository.FriendRequestRepository;
 import ru.job4j.social_media_api.repository.PostRepository;
 import ru.job4j.social_media_api.repository.UserRepository;
+import ru.job4j.social_media_api.dto.request.SignupRequestDTO;
+import ru.job4j.social_media_api.dto.response.RegisterDTO;
+import ru.job4j.social_media_api.model.ERole;
+import ru.job4j.social_media_api.model.Role;
+import ru.job4j.social_media_api.repository.RoleRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +30,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final FriendRequestRepository friendRequestRepository;
+    private PasswordEncoder encoder;
+    private final RoleRepository roleRepository;
 
     /**
      * Finds a user by user ID.
@@ -114,5 +126,35 @@ public class UserService {
      */
     public List<User> findAllSubscribers(int userId) {
         return this.userRepository.findAllSubscribers(userId);
+    }
+
+
+    public RegisterDTO signUp(SignupRequestDTO signUpRequest) {
+        if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))
+                || Boolean.TRUE.equals(userRepository.existsByEmail(signUpRequest.getEmail()))) {
+            return new RegisterDTO(HttpStatus.BAD_REQUEST, "Error: Username or Email is already taken!");
+        }
+
+        User person = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()));
+
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<Role> roles = new HashSet<>();
+        Supplier<RuntimeException> supplier = () -> new RuntimeException("Error: Role is not found.");
+
+        if (strRoles == null) {
+            roles.add(roleRepository.findByName(ERole.ROLE_USER).orElseThrow(supplier));
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin" -> roles.add(roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow(supplier));
+                    case "mod" -> roles.add(roleRepository.findByName(ERole.ROLE_MODERATOR).orElseThrow(supplier));
+                    default -> roles.add(roleRepository.findByName(ERole.ROLE_USER).orElseThrow(supplier));
+                }
+            });
+        }
+        person.setRoles(roles);
+        userRepository.save(person);
+        return new RegisterDTO(HttpStatus.OK, "Person registered successfully!");
     }
 }

@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class UserDTO {
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email should not be empty")
     private String email;
+    private Set<RoleDTO> roleDTOs;
 }
