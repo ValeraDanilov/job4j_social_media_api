@@ -161,7 +161,7 @@ public class PostService {
         if (!this.imageRepository.findImageByPostId(postId).isEmpty()) {
             this.imageRepository.deleteImagesByPostId(postId);
         }
-        return this.postRepository.deleteById(postId);
+        return this.postRepository.deleteById(postId) > 0L;
     }
 
     /**

@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.job4j.social_media_api.model.User;
 import ru.job4j.social_media_api.service.UserService;
 import ru.job4j.social_media_api.validation.ValidUserId;
@@ -126,29 +125,6 @@ public class UserController {
         return this.userService.findByUsernameAndPassword(user)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @Operation
-            (
-                    summary = "Create a new User",
-                    description = "Create a new User with the provided details. Returns the created User object with a 201 Created response code.",
-                    tags = {"User", "post"}
-            )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created successfully", content =
-                    {@Content(schema = @Schema(implementation = User.class), mediaType = "application/json")})
-    })
-    @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        this.userService.create(user);
-        var uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(user.getId())
-                .toUri();
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .location(uri)
-                .body(user);
     }
 
     @Operation

@@ -1,6 +1,8 @@
 package ru.job4j.social_media_api.service;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final FriendRequestRepository friendRequestRepository;
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
 
     /**
@@ -76,17 +78,6 @@ public class UserService {
     }
 
     /**
-     * Creates a new user in the database.
-     *
-     * @param user The user object to be created.
-     * @return The user object that was created and saved in the database.
-     */
-    @Transactional
-    public User create(User user) {
-        return this.userRepository.save(user);
-    }
-
-    /**
      * Updates the information of a user in the database.
      *
      * @param user The user object containing the updated information.
@@ -115,7 +106,7 @@ public class UserService {
         findPosts.forEach(post -> this.postRepository.deleteById(post.getId()));
         List<FriendRequest> findFriendRequest = this.friendRequestRepository.findReceiverById(userId);
         this.friendRequestRepository.deleteAll(findFriendRequest);
-        return this.userRepository.deleteById(userId);
+        return this.userRepository.deleteById(userId) > 0L;
     }
 
     /**

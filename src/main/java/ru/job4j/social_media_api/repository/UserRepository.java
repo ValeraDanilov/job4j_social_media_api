@@ -1,5 +1,6 @@
 package ru.job4j.social_media_api.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -47,5 +48,10 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     )
     List<User> findAllFriends(@Param("userId") int userId);
 
-    boolean deleteById(int userId);
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            delete from User u where u.id = :id
+            """)
+    int deleteById(@Param("id") int id);
 }
+

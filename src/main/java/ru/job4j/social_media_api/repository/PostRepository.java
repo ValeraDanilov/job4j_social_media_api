@@ -41,5 +41,9 @@ public interface PostRepository extends CrudRepository<Post, Integer> {
     )
     Page<Post> findAllPostFromUserSubscriptions(@Param("userId") User userId, Pageable pageable);
 
-    boolean deleteById(int postId);
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            delete from Post p where p.id = :id
+            """)
+    int deleteById(@Param("id") int id);
 }
